@@ -14,6 +14,9 @@ import healthRouter from './routes/health';
 
 const app = express();
 
+// Trust X-Forwarded-* headers when behind nginx/reverse proxy (required for rate limiting)
+app.set('trust proxy', 1);
+
 app.use(cors({ origin: config.corsOrigins === '*' ? true : config.corsOrigins.split(',') }));
 app.use(express.json());
 app.use(apiRateLimiter);
