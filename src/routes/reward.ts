@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { requireAuth } from '../middleware/auth';
+import { logger } from '../logger';
 import { requirePlayIntegrity } from '../middleware/playIntegrity';
 import { rewardRateLimiter } from '../middleware/rateLimit';
 import { claimReward } from '../services/rewardService';
@@ -24,7 +25,7 @@ router.post('/', rewardRateLimiter, requireAuth, requirePlayIntegrity, async (re
 
     res.json(result);
   } catch (err) {
-    console.error('Reward error:', err);
+    logger.error({ err }, 'Reward error');
     res.status(500).json({ error: 'Failed to claim reward' });
   }
 });

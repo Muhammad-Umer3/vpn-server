@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { registerDevice } from '../services/deviceService';
+import { logger } from '../logger';
 import { registerRateLimiter } from '../middleware/rateLimit';
 
 const router = Router();
@@ -16,7 +17,7 @@ router.post('/', registerRateLimiter, async (req: Request, res: Response) => {
     const result = await registerDevice(device_id);
     res.json(result);
   } catch (err) {
-    console.error('Register error:', err);
+    logger.error({ err }, 'Register error');
     res.status(500).json({ error: 'Registration failed' });
   }
 });

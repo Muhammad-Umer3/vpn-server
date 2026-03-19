@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { requireAuth } from '../middleware/auth';
+import { logger } from '../logger';
 import { startSession, endSession } from '../services/usageService';
 
 const router = Router();
@@ -10,7 +11,7 @@ router.post('/start', requireAuth, async (req: Request, res: Response) => {
     await startSession(deviceId);
     res.json({ success: true });
   } catch (err) {
-    console.error('Session start error:', err);
+    logger.error({ err }, 'Session start error');
     res.status(500).json({ error: 'Failed to start session' });
   }
 });
@@ -23,7 +24,7 @@ router.post('/end', requireAuth, async (req: Request, res: Response) => {
     await endSession(deviceId, Number(minutes_used), Number(data_bytes));
     res.json({ success: true });
   } catch (err) {
-    console.error('Session end error:', err);
+    logger.error({ err }, 'Session end error');
     res.status(500).json({ error: 'Failed to end session' });
   }
 });

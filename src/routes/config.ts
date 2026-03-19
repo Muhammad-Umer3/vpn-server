@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { requireAuth } from '../middleware/auth';
+import { logger } from '../logger';
 import { requirePlayIntegrity } from '../middleware/playIntegrity';
 import { getUsage } from '../services/usageService';
 import { getOrCreatePeerConfig } from '../services/wireguardService';
@@ -38,7 +39,7 @@ router.get('/', requireAuth, requirePlayIntegrity, async (req: Request, res: Res
       config: wgConfig,
     });
   } catch (err) {
-    console.error('Config error:', err);
+    logger.error({ err }, 'Config error');
     res.status(500).json({ error: 'Failed to get config' });
   }
 });

@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { logger } from '../logger';
 
 let playIntegrityClient: any = null;
 let isEnabled = false;
@@ -29,7 +30,7 @@ async function initPlayIntegrity(): Promise<boolean> {
     isEnabled = true;
     return true;
   } catch (err) {
-    console.error('Play Integrity init failed:', err);
+    logger.error({ err }, 'Play Integrity init failed');
     return false;
   }
 }
@@ -96,7 +97,7 @@ export async function requirePlayIntegrity(
 
     next();
   } catch (err: any) {
-    console.error('Play Integrity verification error:', err?.message || err);
+    logger.error({ err: err?.message || err }, 'Play Integrity verification error');
     res.status(403).json({
       error: 'Integrity verification failed',
       message: 'Could not verify app authenticity.',

@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { pool } from './pool';
+import { logger } from '../logger';
 
 const MIGRATIONS_DIR = path.join(__dirname, '..', '..', 'db', 'migrations');
 
@@ -21,7 +22,7 @@ export async function runMigrations(): Promise<void> {
     try {
       files = fs.readdirSync(MIGRATIONS_DIR).filter((f) => f.endsWith('.sql'));
     } catch {
-      console.warn('Migrations directory not found, skipping');
+      logger.warn('Migrations directory not found, skipping');
       return;
     }
 
@@ -37,9 +38,9 @@ export async function runMigrations(): Promise<void> {
       try {
         await client.query(sql);
         await client.query('INSERT INTO _migrations (name) VALUES ($1)', [name]);
-        console.log(`Migration applied: ${name}`);
+        logger.info({ migration: name }, 'Migration applied');
       } catch (err) {
-        console.error(`Migration failed: ${name}`, err);
+        logger.error({ err, migration: name }, 'Migration failed');
         throw err;
       }
     }

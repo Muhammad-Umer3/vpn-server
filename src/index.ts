@@ -3,6 +3,7 @@ import cors from 'cors';
 import { config } from './config';
 import { apiRateLimiter } from './middleware/rateLimit';
 import { runMigrations } from './db/migrate';
+import { logger } from './logger';
 
 import registerRouter from './routes/register';
 import usageRouter from './routes/usage';
@@ -34,12 +35,12 @@ async function start() {
   try {
     await runMigrations();
   } catch (err) {
-    console.error('Migrations failed:', err);
+    logger.error({ err }, 'Migrations failed');
     process.exit(1);
   }
 
   app.listen(config.port, () => {
-    console.log(`VPN Control API running on port ${config.port}`);
+    logger.info({ port: config.port }, 'VPN Control API running');
   });
 }
 
