@@ -34,12 +34,7 @@ export DATABASE_URL=postgresql://user:pass@localhost:5432/vpn_control
 psql $DATABASE_URL -f db/schema.sql
 ```
 
-For existing databases, run migrations:
-
-```bash
-psql $DATABASE_URL -f db/migrations/001_add_reward_bytes.sql
-psql $DATABASE_URL -f db/migrations/002_add_session_transfer_stats.sql
-```
+Migrations run automatically on server startup.
 
 ### 3. Environment
 
