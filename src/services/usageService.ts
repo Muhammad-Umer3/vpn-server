@@ -1,5 +1,9 @@
 import { pool } from '../db/pool';
 import { config } from '../config';
+import {
+  getPublicKeyForDevice,
+  getPeerTransferStats,
+} from './wireguardStatsService';
 
 export async function getUsage(deviceId: string): Promise<{
   remaining_minutes: number;
@@ -66,27 +70,72 @@ export async function getUsage(deviceId: string): Promise<{
 export async function startSession(deviceId: string): Promise<void> {
   const today = new Date().toISOString().split('T')[0];
 
+  // Capture WireGuard transfer stats at session start for server-side usage tracking
+  let sessionStartRx: number | null = null;
+  let sessionStartTx: number | null = null;
+  const publicKey = await getPublicKeyForDevice(deviceId);
+  if (publicKey) {
+    const stats = getPeerTransferStats(publicKey);
+    if (stats) {
+      sessionStartRx = stats.rx;
+      sessionStartTx = stats.tx;
+    }
+  }
+
   await pool.query(
-    `INSERT INTO usage_records (device_id, date, last_session_start)
-     VALUES ($1, $2, NOW())
+    `INSERT INTO usage_records (device_id, date, last_session_start, session_start_rx, session_start_tx)
+     VALUES ($1, $2, NOW(), $3, $4)
      ON CONFLICT (device_id, date) 
-     DO UPDATE SET last_session_start = NOW(), updated_at = NOW()`,
-    [deviceId, today]
+     DO UPDATE SET last_session_start = NOW(), session_start_rx = $3, session_start_tx = $4, updated_at = NOW()`,
+    [deviceId, today, sessionStartRx, sessionStartTx]
   );
 }
 
 export async function endSession(deviceId: string, minutesUsed: number, dataBytes: number): Promise<void> {
   const today = new Date().toISOString().split('T')[0];
 
+  let finalMinutes = minutesUsed;
+  let finalBytes = dataBytes;
+
+  // Use server-side stats when available (WireGuard on same host)
+  const usageRow = await pool.query(
+    `SELECT last_session_start, session_start_rx, session_start_tx 
+     FROM usage_records WHERE device_id = $1 AND date = $2`,
+    [deviceId, today]
+  );
+  const usage = usageRow.rows[0];
+
+  const publicKey = await getPublicKeyForDevice(deviceId);
+  if (publicKey) {
+    const stats = getPeerTransferStats(publicKey);
+    if (stats && usage?.session_start_rx != null && usage?.session_start_tx != null) {
+      // Server is source of truth for data
+      const deltaRx = Math.max(0, stats.rx - Number(usage.session_start_rx));
+      const deltaTx = Math.max(0, stats.tx - Number(usage.session_start_tx));
+      finalBytes = deltaRx + deltaTx;
+    }
+  }
+
+  // Use elapsed time from last_session_start when available (server is source of truth for minutes)
+  if (usage?.last_session_start) {
+    const startTime = new Date(usage.last_session_start).getTime();
+    const elapsedMinutes = Math.floor((Date.now() - startTime) / 60000);
+    if (elapsedMinutes >= 0) {
+      finalMinutes = elapsedMinutes;
+    }
+  }
+
   await pool.query(
-    `INSERT INTO usage_records (device_id, date, minutes_used, data_bytes, last_session_start)
-     VALUES ($1, $2, $3, $4, NULL)
+    `INSERT INTO usage_records (device_id, date, minutes_used, data_bytes, last_session_start, session_start_rx, session_start_tx)
+     VALUES ($1, $2, $3, $4, NULL, NULL, NULL)
      ON CONFLICT (device_id, date) 
      DO UPDATE SET 
        minutes_used = usage_records.minutes_used + EXCLUDED.minutes_used,
        data_bytes = usage_records.data_bytes + EXCLUDED.data_bytes,
        last_session_start = NULL,
+       session_start_rx = NULL,
+       session_start_tx = NULL,
        updated_at = NOW()`,
-    [deviceId, today, minutesUsed, dataBytes]
+    [deviceId, today, finalMinutes, finalBytes]
   );
 }

@@ -50,7 +50,7 @@ Pin your API's TLS certificate so the app only talks to your real server. Preven
 ```kotlin
 // OkHttp certificate pinning
 val certificatePinner = CertificatePinner.Builder()
-    .add("api.zerologin.com", "sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
+    .add("api.zerologin.org", "sha256/YOUR_PIN_HERE")
     .build()
 
 OkHttpClient.Builder()
@@ -58,7 +58,7 @@ OkHttpClient.Builder()
     .build()
 ```
 
-Get your cert's pin: `openssl s_client -connect api.zerologin.com:443 | openssl x509 -pubkey -noout | openssl pkey -pubin -outform der | openssl dgst -sha256 -binary | openssl enc -base64`
+Get your cert's pin: `openssl s_client -connect api.zerologin.org:443 -servername api.zerologin.org 2>/dev/null | openssl x509 -pubkey -noout | openssl pkey -pubin -outform der | openssl dgst -sha256 -binary | openssl enc -base64`
 
 ### 1.3 Play Integrity API (Critical)
 
@@ -104,13 +104,14 @@ Reject or warn on rooted devices. Libraries: RootBeer, SafetyNet (deprecated). P
 | Rate limit: Servers | ✅ |
 | Auth on sensitive endpoints | ✅ |
 
-### 2.2 Play Integrity Middleware (Optional)
+### 2.2 Play Integrity Middleware (Implemented)
 
-Add middleware that verifies `X-Play-Integrity-Token` for `/api/config` and `/api/reward`. If token is missing or invalid, return 403. Requires:
+Middleware verifies `X-Play-Integrity-Token` for `/api/config` and `/api/reward` when enabled. If token is missing or invalid, returns 403. See `docs/SECURITY_SETUP.md` for setup.
 
-- Google Cloud project with Play Integrity API enabled
-- Service account credentials
-- `PLAY_INTEGRITY_PROJECT_NUMBER` and `PLAY_INTEGRITY_CREDENTIALS` in `.env`
+Requires in `.env` when enabling:
+- `PLAY_INTEGRITY_ENABLED=true`
+- `PLAY_INTEGRITY_PACKAGE_NAME` (your app package)
+- `GOOGLE_APPLICATION_CREDENTIALS` (path to service account JSON)
 
 ### 2.3 AdMob Server-Side Verification (SSV)
 

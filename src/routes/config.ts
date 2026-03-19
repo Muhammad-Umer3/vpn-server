@@ -1,12 +1,13 @@
 import { Router, Request, Response } from 'express';
 import { requireAuth } from '../middleware/auth';
+import { requirePlayIntegrity } from '../middleware/playIntegrity';
 import { getUsage } from '../services/usageService';
 import { getOrCreatePeerConfig } from '../services/wireguardService';
 import { getActiveServers } from '../services/serverListService';
 
 const router = Router();
 
-router.get('/', requireAuth, async (req: Request, res: Response) => {
+router.get('/', requireAuth, requirePlayIntegrity, async (req: Request, res: Response) => {
   try {
     const deviceId = (req as any).deviceId;
 

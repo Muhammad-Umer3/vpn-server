@@ -23,6 +23,8 @@ CREATE TABLE IF NOT EXISTS usage_records (
   minutes_used INTEGER DEFAULT 0,
   data_bytes BIGINT DEFAULT 0,
   last_session_start TIMESTAMPTZ,
+  session_start_rx BIGINT,
+  session_start_tx BIGINT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(device_id, date)

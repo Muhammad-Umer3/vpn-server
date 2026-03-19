@@ -8,7 +8,7 @@ Backend for a freemium VPN app with ad-based rewards. Handles device registratio
 - **Usage tracking** – 30 min/day free, daily bandwidth cap (default 1GB), server-side enforcement
 - **Rewards** – +20 min per rewarded ad (AdMob or other networks)
 - **Per-user WireGuard** – Unique peer config per device, revocable
-- **Session tracking** – Start/end session with minutes and data usage
+- **Session tracking** – Start/end session with minutes and data usage (server verifies via WireGuard stats when on same host)
 
 ## Quick Start
 
@@ -38,6 +38,7 @@ For existing databases, run migrations:
 
 ```bash
 psql $DATABASE_URL -f db/migrations/001_add_reward_bytes.sql
+psql $DATABASE_URL -f db/migrations/002_add_session_transfer_stats.sql
 ```
 
 ### 3. Environment

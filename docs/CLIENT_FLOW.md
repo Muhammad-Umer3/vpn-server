@@ -99,6 +99,8 @@ flowchart TD
 | 2 | End session | `POST /api/session/end` | Body: `{ "minutes_used": N, "data_bytes": N }` |
 | 3 | Refresh UI | `GET /api/usage` | Update remaining time display |
 
+**Server-side usage:** When the API runs on the same host as WireGuard, usage is verified server-side. Minutes come from `last_session_start` → now; data comes from WireGuard transfer stats. Client-reported values are used only when server stats are unavailable.
+
 ### When User Watches Rewarded Ad
 
 | Step | Action | API | Notes |
