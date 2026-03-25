@@ -18,7 +18,7 @@ You **cannot** fully hide the API from a decompiled app. The base URL lives in t
 
 ### 1. Play Integrity API (Most Effective)
 
-Google attests that the request comes from your real app on a real device. When enabled, `/api/config` and `/api/reward` require a valid `X-Play-Integrity-Token` header.
+Google attests that the request comes from your real app on a real device. When enabled, `/api/register`, `/api/config`, and `/api/reward` require a valid `X-Play-Integrity-Token` header.
 
 #### Server setup
 
@@ -55,7 +55,7 @@ Google attests that the request comes from your real app on a real device. When 
 #### Android app setup
 
 1. Add [Play Integrity API dependency](https://developer.android.com/google/play/integrity/setup)
-2. Before calling `/api/config` or `/api/reward`, request a token:
+2. Before calling `/api/register`, `/api/config`, or `/api/reward`, request a token:
    ```kotlin
    val nonce = UUID.randomUUID().toString() // or hash of request
    val integrityToken = integrityManager.requestIntegrityToken(

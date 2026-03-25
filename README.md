@@ -73,20 +73,22 @@ Then add the printed server public key and endpoint to `.env`.
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
-| POST | `/api/register` | No | Register device, returns `device_token` |
+| POST | `/api/register` | No† | Register device, returns `device_token` |
 | GET | `/api/usage` | Yes | Get remaining minutes, usage stats |
-| POST | `/api/reward` | Yes | Claim ad reward (+20 min) |
+| POST | `/api/reward` | Yes† | Claim ad reward (+20 min) |
 | POST | `/api/session/start` | Yes | Start VPN session |
 | POST | `/api/session/end` | Yes | End session, report usage |
-| GET | `/api/config` | Yes | Get WireGuard config (requires remaining time) |
+| GET | `/api/config` | Yes† | Get WireGuard config (requires remaining time) |
 | GET | `/api/servers` | No | List VPN server regions |
 | GET | `/health` | No | Health check |
 
 **Auth:** Send `Authorization: Bearer <device_token>` or `device_token` in body/query.
 
+**† Play Integrity:** When the server has `PLAY_INTEGRITY_ENABLED=true`, the app must send `X-Play-Integrity-Token` on `POST /api/register`, `GET /api/config`, and `POST /api/reward`. See `docs/SECURITY_SETUP.md`.
+
 ## Android Integration
 
-1. **Register** – Call `POST /api/register` with `device_id` (Android ID or UUID). Store `device_token`.
+1. **Register** – Request a Play Integrity token if your server requires it, then call `POST /api/register` with `device_id` (Android ID or UUID) and the token header. Store `device_token`.
 2. **Before connect** – Call `GET /api/config`. If `remaining_minutes > 0`, use returned `config.config_string` for WireGuard.
 3. **AdMob** – After user watches rewarded ad, call `POST /api/reward` with `reward_type: "admob_rewarded"`.
 4. **Session** – Call `POST /api/session/start` when VPN connects, `POST /api/session/end` with `minutes_used` and `data_bytes` when it disconnects.

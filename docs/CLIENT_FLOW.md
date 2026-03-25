@@ -68,7 +68,7 @@ flowchart TD
 | Step | Action | API | Notes |
 |------|--------|-----|------|
 | 1 | Generate or read device ID | — | Use `Settings.Secure.ANDROID_ID` or UUID stored in EncryptedSharedPreferences |
-| 2 | Register device | `POST /api/register` | Body: `{ "device_id": "<android_id_or_uuid>" }` |
+| 2 | Register device | `POST /api/register` | Body: `{ "device_id": "<android_id_or_uuid>" }`. If the server uses Play Integrity (`PLAY_INTEGRITY_ENABLED`), header: `X-Play-Integrity-Token` (request token the same way as for `/api/config` / `/api/reward`). |
 | 3 | Store response | — | Save `device_token` securely (EncryptedSharedPreferences) |
 | 4 | Fetch usage | `GET /api/usage` | Header: `Authorization: Bearer <device_token>` |
 
@@ -116,13 +116,15 @@ flowchart TD
 
 | Endpoint | Method | Auth | Request | Response |
 |----------|--------|------|---------|----------|
-| `/api/register` | POST | No | `{ device_id: string }` | `{ device_token: string }` |
+| `/api/register` | POST | No* | `{ device_id: string }` | `{ device_token: string }` |
 | `/api/usage` | GET | Bearer token | — | `{ remaining_minutes, minutes_used, data_bytes, daily_limit, rewards_today, remaining_bytes, daily_bandwidth_bytes, bytes_from_rewards_today }` |
 | `/api/config` | GET | Bearer token | — | `{ remaining_minutes, servers, config: { config_string, ... } }` or 403 |
 | `/api/session/start` | POST | Bearer token | — | `{ success: true }` |
 | `/api/session/end` | POST | Bearer token | `{ minutes_used, data_bytes }` | `{ success: true }` |
 | `/api/reward` | POST | Bearer token | `{ reward_type?, ad_network? }` | `{ minutes_added: 20, bytes_added: 314572800, success: true }` |
 | `/api/servers` | GET | No | — | `{ servers: [{ id, name, region, host, port, endpoint }] }` |
+
+\*Register: when `PLAY_INTEGRITY_ENABLED=true`, send `X-Play-Integrity-Token` (see `docs/SECURITY_SETUP.md`). Config and reward use the same header when enabled.
 
 ---
 

@@ -2,10 +2,11 @@ import { Router, Request, Response } from 'express';
 import { registerDevice } from '../services/deviceService';
 import { logger } from '../logger';
 import { registerRateLimiter } from '../middleware/rateLimit';
+import { requirePlayIntegrity } from '../middleware/playIntegrity';
 
 const router = Router();
 
-router.post('/', registerRateLimiter, async (req: Request, res: Response) => {
+router.post('/', registerRateLimiter, requirePlayIntegrity, async (req: Request, res: Response) => {
   try {
     const { device_id } = req.body;
 

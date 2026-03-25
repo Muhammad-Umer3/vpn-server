@@ -38,8 +38,8 @@ async function initPlayIntegrity(): Promise<boolean> {
 const initPromise = initPlayIntegrity();
 
 /**
- * Middleware that verifies X-Play-Integrity-Token for sensitive endpoints.
- * When PLAY_INTEGRITY_ENABLED is not set, passes through (no verification).
+ * Middleware that verifies X-Play-Integrity-Token for sensitive endpoints
+ * (register, config, reward). When PLAY_INTEGRITY_ENABLED is not set, passes through.
  * Requires MEETS_DEVICE_INTEGRITY and MEETS_APP_INTEGRITY for success.
  */
 export async function requirePlayIntegrity(

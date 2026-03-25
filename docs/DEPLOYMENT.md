@@ -28,6 +28,13 @@ docker compose ps
 
 Schema is applied automatically on first start via `db/schema.sql`.
 
+**Security:** `docker-compose.yml` maps Postgres and Redis to `127.0.0.1` only. If you previously published `5432`/`6379` on all interfaces, recreate the stack so the droplet is not scanned as “open Redis” from the internet:
+
+```bash
+docker compose down
+docker compose up -d
+```
+
 ---
 
 ## 3. Configure Environment

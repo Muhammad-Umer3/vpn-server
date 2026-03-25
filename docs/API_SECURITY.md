@@ -106,7 +106,7 @@ Reject or warn on rooted devices. Libraries: RootBeer, SafetyNet (deprecated). P
 
 ### 2.2 Play Integrity Middleware (Implemented)
 
-Middleware verifies `X-Play-Integrity-Token` for `/api/config` and `/api/reward` when enabled. If token is missing or invalid, returns 403. See `docs/SECURITY_SETUP.md` for setup.
+Middleware verifies `X-Play-Integrity-Token` for `/api/register`, `/api/config`, and `/api/reward` when enabled. If the token is missing or invalid, returns 403. See `docs/SECURITY_SETUP.md` for setup.
 
 Requires in `.env` when enabling:
 - `PLAY_INTEGRITY_ENABLED=true`

@@ -11,8 +11,9 @@ services:
       POSTGRES_USER: vpn
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-vpn_secret_change_me}
       POSTGRES_DB: vpn_control
+    # Bind to localhost only — do not expose DB to the public internet
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
@@ -26,8 +27,9 @@ services:
     image: redis:7-alpine
     container_name: vpn-redis
     restart: unless-stopped
+    # Bind to localhost only — Redis must not be reachable from the public internet
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
     volumes:
       - redis_data:/data
     healthcheck:
